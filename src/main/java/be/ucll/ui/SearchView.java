@@ -1,6 +1,7 @@
 package be.ucll.ui;
 
 import be.ucll.entities.Order;
+import be.ucll.services.OrderService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.grid.Grid;
@@ -10,8 +11,10 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
@@ -27,9 +30,13 @@ public class SearchView extends VerticalLayout {
     private final EmailField emailField = new EmailField("Email adres");
 
     private final Grid<Order> orderGrid = new Grid<>(Order.class);
+    @Autowired
+    private OrderService orderService;
+    private Binder<Order> orderBinder= new Binder<>(Order.class);
 
     public SearchView() {
         configureFields();
+
 
         Button searchButton = new Button("Zoeken", event -> searchOrders());
         Button clearButton = new Button("Wissen", event -> clearFields());
@@ -39,12 +46,28 @@ public class SearchView extends VerticalLayout {
         searchForm.getStyle().set("margin-bottom", "20px");
 
         configureGrid();
+        loadOrders();
 
         add(searchForm, orderGrid);
 
 
         setSpacing(true);
         setPadding(true);
+    }
+
+    //online gevonden nog uitdokteren
+    private void configureBinder(){
+        orderBinder.forField(minAmountField)
+                .withValidator(value -> value == null || value >= 0, "Minimum bedrag moet positief zijn");
+
+
+        orderBinder.forField(maxAmountField)
+                .withValidator(value -> value == null || value >= 0, "Maximum bedrag moet positief zijn");
+
+
+        orderBinder.forField(emailField)
+                .withValidator(email -> email.contains("@") && email.contains("."), "Voer een geldig e-mailadres in");
+
     }
 
     private void configureFields() {
@@ -74,12 +97,29 @@ public class SearchView extends VerticalLayout {
         orderGrid.getColumnByKey("delivered").setHeader("Afgeleverd?");
     }
 
-    private void searchOrders() {
-        List<Order> orders = List.of(
-                new Order(1L, "John Doe", 120.50, true),
-                new Order(2L, "Jane Smith", 75.99, false)
-        );
+
+
+    private void loadOrders(){
+        orderGrid.setItems(orderService.findAll());
+    }
+    private void searchOrders(){
+        // Valideer invoervelden
+        if (!orderBinder.validate().isOk()) {
+            Notification.show("Er zijn validatiefouten in de invoervelden.");
+            return;
+        }
+
+        // Ophalen zoekcriteria
+        String productName = productNameField.getValue();
+        Double minAmount = minAmountField.getValue();
+        Double maxAmount = maxAmountField.getValue();
+        Boolean delivered = deliveredCheckbox.getValue();
+        String email = emailField.getValue();
+
+        // Query de service voor orders die overeenkomen met de criteria
+        List<Order> orders = orderService.findOrders(productName, minAmount, maxAmount, delivered, email);
         orderGrid.setItems(orders);
+
     }
 
     private void clearFields() {

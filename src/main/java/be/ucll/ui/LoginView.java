@@ -3,6 +3,7 @@ package be.ucll.ui;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.router.PageTitle;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -16,6 +17,7 @@ import be.ucll.services.UserService;
 
 
 @Route(value = "",layout = MainLayout.class)
+@PageTitle("login")
 public class LoginView extends VerticalLayout {
 
 	@Autowired

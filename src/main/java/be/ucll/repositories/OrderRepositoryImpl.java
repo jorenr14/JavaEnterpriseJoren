@@ -7,6 +7,8 @@ import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
+import java.util.List;
+
 @Repository
 public class OrderRepositoryImpl implements OrderRepository {
 
@@ -16,6 +18,11 @@ public class OrderRepositoryImpl implements OrderRepository {
         @Override
         public Collection<Order> findAll() {
             return entityManager.createQuery("from Order").getResultList();
+        }
+
+        @Override
+        public List<Order> findByUserEmail(String email) {
+                return List.of();
         }
 
 
