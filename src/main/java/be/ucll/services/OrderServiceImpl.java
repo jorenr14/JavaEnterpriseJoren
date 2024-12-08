@@ -6,12 +6,26 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 @Service
 @Transactional
 public class OrderServiceImpl implements OrderService {
+    private final List<Order> orders;
+    public OrderServiceImpl() {
+        this.orders = new ArrayList<>();
+        // Voeg mockdata toe
+        this.orders.add(new Order(1, "12345", 3, true));
+        this.orders.add(new Order(2, "67890", 5, false));
+        this.orders.add(new Order(3, "54321", 2, true));
+
+
+    }
+
+
     @Autowired
     private OrderRepository orderRepository;
 
@@ -46,4 +60,14 @@ public class OrderServiceImpl implements OrderService {
                 })
                 .toList();
     }
+
+    @Override
+    public Order getOrderById(Long orderId) {
+        return orders.stream()
+                .filter(order -> order.getId().equals(orderId))
+                .findFirst()
+                .orElse(null);
+    }
+
+
 }

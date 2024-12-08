@@ -30,13 +30,14 @@ public class SearchView extends VerticalLayout {
     private final EmailField emailField = new EmailField("Email adres");
 
     private final Grid<Order> orderGrid = new Grid<>(Order.class);
-    @Autowired
-    private OrderService orderService;
+    private final OrderService orderService;
     private Binder<Order> orderBinder= new Binder<>(Order.class);
 
-    public SearchView() {
-        configureFields();
+    public SearchView(OrderService orderService) {
 
+        this.orderService = orderService;
+        configureBinder();
+        configureFields();
 
         Button searchButton = new Button("Zoeken", event -> searchOrders());
         Button clearButton = new Button("Wissen", event -> clearFields());
@@ -79,6 +80,27 @@ public class SearchView extends VerticalLayout {
         minAmountField.setPlaceholder("Min bedrag");
         maxAmountField.setPlaceholder("Max bedrag");
         productCountField.setPlaceholder("Aantal");
+
+        minAmountField.addBlurListener(event -> validateField(minAmountField));
+        maxAmountField.addBlurListener(event -> validateField(maxAmountField));
+        productCountField.addBlurListener(event -> validateField(productCountField));
+        emailField.addBlurListener(event -> {
+            String emailRegex = "^[a-zA-Z]+@[a-zA-Z]+\\.[a-zA-Z]{2,}$";
+            if (!emailField.getValue().matches(emailRegex)) {
+                emailField.setInvalid(true);
+            } else {
+                emailField.setInvalid(false);
+            }
+        });
+        productCountField.addBlurListener(event -> {
+            Double value = productCountField.getValue();
+            if (value == null || value < 0 || value % 1 != 0) {
+                productCountField.setErrorMessage("Aantal moet een geheel getal zijn.");
+                productCountField.setInvalid(true);
+            } else {
+                productCountField.setInvalid(false);
+            }
+        });
 
 
         productNameField.addValueChangeListener(event -> {
@@ -130,6 +152,16 @@ public class SearchView extends VerticalLayout {
         deliveredCheckbox.clear();
         emailField.clear();
     }
+
+
+    private void validateField(NumberField field) {
+        if (!orderBinder.validate().isOk()) {
+            field.setInvalid(true);
+        } else {
+            field.setInvalid(false);
+        }
+    }
+
 
 
 
