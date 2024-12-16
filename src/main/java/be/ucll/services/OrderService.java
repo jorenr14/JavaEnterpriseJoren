@@ -13,4 +13,6 @@ public interface OrderService {
 
     Order getOrderById(Long orderId);
 
+    List<String> findProductNames(String productName);
+
 }

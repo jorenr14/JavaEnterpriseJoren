@@ -4,6 +4,7 @@ import be.ucll.entities.Order;
 import be.ucll.services.OrderService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.notification.Notification;
@@ -22,7 +23,7 @@ import java.util.List;
 @PageTitle("Search Orders")
 public class SearchView extends VerticalLayout {
 
-    private final TextField productNameField = new TextField("Product naam");
+    private final ComboBox<String> productNameField = new ComboBox<>("Product naam");
     private final NumberField minAmountField = new NumberField("Minimum bedrag");
     private final NumberField maxAmountField = new NumberField("Maximum bedrag");
     private final NumberField productCountField = new NumberField("Aantal producten");
@@ -102,10 +103,18 @@ public class SearchView extends VerticalLayout {
             }
         });
 
-
+        productNameField.setAllowCustomValue(true);
+        productNameField.setPlaceholder("Typ productnaam...");
+        productNameField.addCustomValueSetListener(event -> {
+            String customValue = event.getDetail();
+            productNameField.setValue(customValue);
+            Notification.show("Geselecteerde waarde: " + customValue);
+        });
         productNameField.addValueChangeListener(event -> {
-            if (!event.getValue().isEmpty()) {
-                Notification.show("Suggesties voor product: " + event.getValue());
+            String searchTerm = event.getValue();
+            if (searchTerm != null && !searchTerm.isEmpty()) {
+                List<String> suggestions = orderService.findProductNames(searchTerm);
+                productNameField.setItems(suggestions);
             }
         });
     }
@@ -128,6 +137,13 @@ public class SearchView extends VerticalLayout {
         // Valideer invoervelden
         if (!orderBinder.validate().isOk()) {
             Notification.show("Er zijn validatiefouten in de invoervelden.");
+            return;
+        }
+
+        // Controleer of criteria zijn ingevuld
+        if (productNameField.isEmpty() && minAmountField.isEmpty() && maxAmountField.isEmpty() &&
+                productCountField.isEmpty() && deliveredCheckbox.isEmpty() && emailField.isEmpty()) {
+            Notification.show("Geef ten minste één zoekcriteria op.");
             return;
         }
 

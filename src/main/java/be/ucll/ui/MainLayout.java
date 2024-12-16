@@ -14,7 +14,5 @@ public class MainLayout extends AppLayout {
     public MainLayout(HeaderComponent header, FooterComponent footer) {
         addToNavbar(header);
 
-
-
     }
 }

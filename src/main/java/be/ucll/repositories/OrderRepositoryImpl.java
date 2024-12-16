@@ -25,5 +25,10 @@ public class OrderRepositoryImpl implements OrderRepository {
                 return List.of();
         }
 
+        @Override
+        public List<String> findProductNamesContaining(String searchTerm) {
+                return List.of();
+        }
+
 
 }

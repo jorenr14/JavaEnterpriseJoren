@@ -11,7 +11,7 @@ public class JmsProducer {
     @Autowired
     JmsTemplate jmsTemplate ;
 
-    @Value( "${active-mq.topic}" )
+    @Value("${active-mq.topic:default-topic}")
     private String topic ;
 
     public void sendMessage(User message){

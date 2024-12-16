@@ -14,5 +14,8 @@ public interface OrderRepository {
 	@Query("SELECT o FROM Order o WHERE o.user.username = :email")
 	List<Order> findByUserEmail(@Param("email") String email);
 
+	@Query("SELECT DISTINCT p.name FROM Product p WHERE p.name LIKE %:searchTerm%")
+	List<String> findProductNamesContaining(@Param("searchTerm") String searchTerm);
+
 
 }
