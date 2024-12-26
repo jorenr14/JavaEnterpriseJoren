@@ -16,7 +16,7 @@ import be.ucll.services.UserService;
 
 
 
-@Route(value = "",layout = MainLayout.class)
+@Route(value = "login",layout = MainLayout.class)
 @PageTitle("login")
 public class LoginView extends VerticalLayout {
 

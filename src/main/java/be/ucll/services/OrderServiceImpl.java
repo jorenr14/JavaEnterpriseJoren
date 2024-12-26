@@ -14,6 +14,7 @@ import java.util.List;
 @Service
 @Transactional
 public class OrderServiceImpl implements OrderService {
+
     private final List<Order> orders;
     public OrderServiceImpl() {
         this.orders = new ArrayList<>();
@@ -22,9 +23,7 @@ public class OrderServiceImpl implements OrderService {
         this.orders.add(new Order(2, "67890", 5, false));
         this.orders.add(new Order(3, "54321", 2, true));
 
-
     }
-
 
     @Autowired
     private OrderRepository orderRepository;

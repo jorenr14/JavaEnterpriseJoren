@@ -1,6 +1,7 @@
 package be.ucll.ui;
 
 import be.ucll.entities.Order;
+import be.ucll.services.MailService;
 import be.ucll.services.OrderService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -15,11 +16,12 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
-@Route(value = "search", layout = MainLayout.class)
+@Route(value = "", layout = MainLayout.class)
 @PageTitle("Search Orders")
 public class SearchView extends VerticalLayout {
 
@@ -34,7 +36,11 @@ public class SearchView extends VerticalLayout {
     private final OrderService orderService;
     private Binder<Order> orderBinder= new Binder<>(Order.class);
 
+    @Autowired
+    private MailService emailService;
+
     public SearchView(OrderService orderService) {
+
 
         this.orderService = orderService;
         configureBinder();
@@ -42,6 +48,14 @@ public class SearchView extends VerticalLayout {
 
         Button searchButton = new Button("Zoeken", event -> searchOrders());
         Button clearButton = new Button("Wissen", event -> clearFields());
+        Button emailButton = new Button("Stuur Email", event -> {
+            try {
+                sendEmailWithProductIds();
+            } catch (MessagingException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
 
         Div searchForm = new Div(productNameField, minAmountField, maxAmountField, productCountField, deliveredCheckbox, emailField, searchButton, clearButton);
         searchForm.addClassName("search-form");
@@ -176,6 +190,31 @@ public class SearchView extends VerticalLayout {
         } else {
             field.setInvalid(false);
         }
+    }
+
+    private void sendEmailWithProductIds() throws MessagingException {
+        List<Order> selectedOrders = orderGrid.getSelectedItems().stream().toList();
+
+        if (selectedOrders.isEmpty()) {
+            Notification.show("Selecteer minstens één bestelling.");
+            return;
+        }
+
+        // Verzamel product-ID's
+        List<Long> productIds = selectedOrders.stream()
+                .flatMap(order -> order.getProducts().stream().map(product -> product.getId()))
+                .toList();
+
+        // Controleer e-mailadres
+        String email = emailField.getValue();
+        if (email == null || email.isEmpty() || !email.contains("@")) {
+            Notification.show("Vul een geldig e-mailadres in.");
+            return;
+        }
+
+        // E-mail versturen
+        emailService.sendProductIds(email, productIds);
+        Notification.show("E-mail wordt verzonden naar " + email + "!");
     }
 
 

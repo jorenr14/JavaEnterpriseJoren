@@ -14,8 +14,9 @@ public class JmsProducer {
     @Value("${active-mq.topic:default-topic}")
     private String topic ;
 
-    public void sendMessage(User message){
-       jmsTemplate .convertAndSend( topic , message);
+    public void sendMessage(String email, String subject, String content) {
+       String message = email + ": " + subject + ": " + content ;
+        jmsTemplate .convertAndSend( topic , message);
     }
 }
 

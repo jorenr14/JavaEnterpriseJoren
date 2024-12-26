@@ -1,29 +1,44 @@
 package be.ucll.services;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.MailSender;
+import jakarta.mail.MessagingException;
+
 import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class MailService {
 
-    private MailSender mailSender;
+    private JavaMailSender mailSender;
 
 
-    public void setMailSender(MailSender mailSender) {
-        this.mailSender = mailSender;
-    }
 
-    public void sendSummaryMail(String to, String subject, String text) {
+    public void sendmail(String to, String subject, String body) throws MessagingException {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(to);
         message.setSubject(subject);
-        message.setText("Beste Gebruiker, hieronder\n" +
-                "het gevraagde overzicht van de bestellingen via email"+ text);
+        message.setText(body);
 
-        mailSender.send(message);
+        mailSender.send(message); // E-mail verzenden
+        System.out.println("E-mail verzonden naar: " + to);
     }
+    public void sendProductIds(String to, List<Long> productIds) throws MessagingException {
+        StringBuilder body = new StringBuilder();
+        body.append("Beste Gebruiker,\n\n");
+        body.append("Hieronder vindt u de ID's van de geselecteerde producten:\n\n");
+
+        // Voeg ID's toe
+        for (Long id : productIds) {
+            body.append("- Product ID: ").append(id).append("\n");
+        }
+
+        body.append("\nMet vriendelijke groet,\nUw winkelteam");
+
+        sendmail(to,"bestelling overzicht", body.toString());
+    }
+
 
 
 }
