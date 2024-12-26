@@ -14,6 +14,13 @@ public class Product {
     @JoinColumn(name = "order_id")
     private Order order;
 
+    public Product(String name, double price) {
+    }
+
+    public Product() {
+
+    }
+
     public Long getId() {
         return id;
     }

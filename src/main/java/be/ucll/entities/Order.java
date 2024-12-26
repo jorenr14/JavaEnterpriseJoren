@@ -3,6 +3,7 @@ package be.ucll.entities;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -28,6 +29,10 @@ public class Order {
 
     public Order(long id, String name, double totalAmount, boolean delivered) {
     }
+
+    public <E> Order(User user1, List<E> product1, Date date, double v, boolean b) {
+    }
+
 
     public Long getId() {
         return id;

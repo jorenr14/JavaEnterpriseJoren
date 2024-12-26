@@ -2,8 +2,12 @@ package be.ucll.setup;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.stream.IntStream;
 
+import be.ucll.entities.Order;
+import be.ucll.entities.Product;
+import be.ucll.entities.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -29,17 +33,26 @@ public class InitialDataSetup {
 		TransactionTemplate transactionTemplate = new TransactionTemplate(platformTransactionManager);
 		transactionTemplate.execute(e -> {
 
-//			IntStream.range(0, 5).forEach(value -> {
-//				TestEntity testEntity = new TestEntity();
-//				testEntity.setValue("This is value nr " + value + " created at " + new SimpleDateFormat().format(new Date()));
-//				entityManager.persist(testEntity);
-//			});
+			User user1 = new User("test", "test");
+            User user2 = new User("admin", "admin");
+            entityManager.persist(user1);
+            entityManager.persist(user2);
 
-			/**
-			 * Hier kan je meer data setup in plaatsen van het moment je datamodel klaar is
-			 */
+            // Voeg Producten toe
+            Product product1 = new Product("Laptop", 799.99);
+            Product product2 = new Product("Muis", 19.99);
+            Product product3 = new Product("Toetsenbord", 49.99);
+            entityManager.persist(product1);
+            entityManager.persist(product2);
+            entityManager.persist(product3);
 
-			return null;
+            // Voeg Orders toe
+            Order order1 = new Order(user1, List.of(product1, product2), new Date(), 819.98, true);
+            Order order2 = new Order(user2, List.of(product3), new Date(), 49.99, false);
+            entityManager.persist(order1);
+            entityManager.persist(order2);
+
+            return null;
 		});
 	}
 }

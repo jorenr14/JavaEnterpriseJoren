@@ -57,7 +57,7 @@ public class SearchView extends VerticalLayout {
         });
 
 
-        Div searchForm = new Div(productNameField, minAmountField, maxAmountField, productCountField, deliveredCheckbox, emailField, searchButton, clearButton);
+        Div searchForm = new Div(productNameField, minAmountField, maxAmountField, productCountField, deliveredCheckbox, emailField, searchButton, clearButton, emailButton);
         searchForm.addClassName("search-form");
         searchForm.getStyle().set("margin-bottom", "20px");
 

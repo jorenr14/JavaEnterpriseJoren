@@ -17,6 +17,12 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Order> orders;
 
+    public User() {
+    }
+
+    public User(String username, String password) {
+    }
+
     public Long getId() {
         return id;
     }
