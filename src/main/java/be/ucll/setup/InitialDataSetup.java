@@ -1,6 +1,7 @@
 package be.ucll.setup;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.IntStream;
@@ -33,24 +34,31 @@ public class InitialDataSetup {
 		TransactionTemplate transactionTemplate = new TransactionTemplate(platformTransactionManager);
 		transactionTemplate.execute(e -> {
 
-			User user1 = new User("test", "test");
-            User user2 = new User("admin", "admin");
+            // Maak gebruiker
+            User user1 = new User("test", "test", "test@example.com");
             entityManager.persist(user1);
-            entityManager.persist(user2);
 
-            // Voeg Producten toe
-            Product product1 = new Product("Laptop", 799.99);
-            Product product2 = new Product("Muis", 19.99);
-            Product product3 = new Product("Toetsenbord", 49.99);
+            // Maak eerste order
+            Order order1 = new Order("John Doe", LocalDate.now(), 2, 120.50, true, user1);
+            entityManager.persist(order1);
+
+            // Maak tweede order
+            Order order2 = new Order("Jane Doe", LocalDate.now(), 1, 75.99, false, user1);
+            entityManager.persist(order2);
+
+            // Voeg producten toe aan eerste order
+            Product product1 = new Product("Laptop", 999.99, order1);
+            Product product2 = new Product("Muis", 25.99, order1);
             entityManager.persist(product1);
             entityManager.persist(product2);
+
+            // Voeg product toe aan tweede order
+            Product product3 = new Product("Toetsenbord", 49.99, order2);
             entityManager.persist(product3);
 
-            // Voeg Orders toe
-            Order order1 = new Order(user1, List.of(product1, product2), new Date(), 819.98, true);
-            Order order2 = new Order(user2, List.of(product3), new Date(), 49.99, false);
-            entityManager.persist(order1);
-            entityManager.persist(order2);
+
+            System.out.println("Order toegevoegd: " + order1.getCustomerName() + ", Totaal: " + order1.getTotalAmount());
+
 
             return null;
 		});

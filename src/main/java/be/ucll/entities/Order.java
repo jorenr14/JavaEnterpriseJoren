@@ -3,6 +3,7 @@ package be.ucll.entities;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -22,15 +23,21 @@ public class Order {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
-    private List<Product> products;
+    @OneToMany(mappedBy = "order", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<Product> products = new ArrayList<>();
 
-    public Order() {}
 
-    public Order(long id, String name, double totalAmount, boolean delivered) {
+    public Order(String customerName, LocalDate orderDate, int productQuantity, double totalAmount, boolean delivered, User user) {
+        this.customerName = customerName;
+        this.orderDate = orderDate;
+        this.productQuantity = productQuantity;
+        this.totalAmount = totalAmount;
+        this.delivered = delivered;
+        this.user = user;
     }
 
-    public <E> Order(User user1, List<E> product1, Date date, double v, boolean b) {
+    public Order() {
+
     }
 
 

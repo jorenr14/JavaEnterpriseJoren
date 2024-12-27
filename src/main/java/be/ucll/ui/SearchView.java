@@ -61,7 +61,7 @@ public class SearchView extends VerticalLayout {
         searchForm.addClassName("search-form");
         searchForm.getStyle().set("margin-bottom", "20px");
 
-        configureGrid();
+        //configureGrid();
         loadOrders();
 
         add(searchForm, orderGrid);
@@ -134,17 +134,16 @@ public class SearchView extends VerticalLayout {
     }
 
     private void configureGrid() {
-        orderGrid.addClassName("order-grid");
-        orderGrid.setColumns("id", "customerName", "totalAmount", "delivered");
-        orderGrid.getColumnByKey("id").setHeader("Bestel-ID");
-        orderGrid.getColumnByKey("customerName").setHeader("Klant");
-        orderGrid.getColumnByKey("totalAmount").setHeader("Totaalbedrag");
-        orderGrid.getColumnByKey("delivered").setHeader("Afgeleverd?");
+        orderGrid.addColumn(Order::getId).setHeader("ID");
+        orderGrid.addColumn(Order::getCustomerName).setHeader("Klant");
+        orderGrid.addColumn(order -> order.getProducts().size()).setHeader("# Producten");
+        orderGrid.addColumn(Order::isDelivered).setHeader("Afgeleverd?");
+        orderGrid.addColumn(Order::getTotalAmount).setHeader("Totaalbedrag (€)");
+
+
     }
 
-
-
-    private void loadOrders(){
+        private void loadOrders(){
         orderGrid.setItems(orderService.findAll());
     }
     private void searchOrders(){

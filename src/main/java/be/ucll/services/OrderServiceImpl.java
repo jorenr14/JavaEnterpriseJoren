@@ -18,10 +18,7 @@ public class OrderServiceImpl implements OrderService {
     private final List<Order> orders;
     public OrderServiceImpl() {
         this.orders = new ArrayList<>();
-        // Voeg mockdata toe
-        this.orders.add(new Order(1, "12345", 3, true));
-        this.orders.add(new Order(2, "67890", 5, false));
-        this.orders.add(new Order(3, "54321", 2, true));
+
 
     }
 

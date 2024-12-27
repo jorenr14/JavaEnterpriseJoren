@@ -14,7 +14,10 @@ public class Product {
     @JoinColumn(name = "order_id")
     private Order order;
 
-    public Product(String name, double price) {
+    public Product(String name, double price, Order order) {
+        this.name = name;
+        this.price = price;
+        this.order = order;
     }
 
     public Product() {

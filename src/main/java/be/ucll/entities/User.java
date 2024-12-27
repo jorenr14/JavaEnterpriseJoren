@@ -2,6 +2,7 @@ package be.ucll.entities;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -13,14 +14,14 @@ public class User {
     private String username;
     private String password;
     private String email;
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<Order> orders = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<Order> orders;
 
     public User() {
     }
 
-    public User(String username, String password) {
+    public User(String username, String password, String email) {
     }
 
     public Long getId() {
