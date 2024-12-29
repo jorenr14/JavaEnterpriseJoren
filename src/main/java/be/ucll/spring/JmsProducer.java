@@ -34,6 +34,7 @@ public class JmsProducer {
         System.out.println("Bericht verzonden naar queue: " + queueName);
     }
 
+
 //    public void sendEmailRequest(String email, List<Long> productIds) {
 //        // Verstuur bericht naar de opgegeven queue
 //        jmsTemplate.send(queueName, new MessageCreator() {
