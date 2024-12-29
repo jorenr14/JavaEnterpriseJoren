@@ -5,13 +5,13 @@ import be.ucll.entities.Order;
 import be.ucll.services.OrderService;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterObserver;
-import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.*;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.Serializable;
 import java.util.Optional;
@@ -19,59 +19,47 @@ import java.util.Optional;
 import static java.awt.AWTEventMulticaster.add;
 
 
-@Route(value = "details/:orderId", layout = MainLayout.class)
+@Route(value = "details", layout = MainLayout.class)
 @PageTitle("Order Details")
-public class DetailView extends VerticalLayout implements BeforeEnterObserver {
+public class DetailView extends VerticalLayout implements HasUrlParameter<Long> {
 
     private final OrderService orderService; // Service om data op te halen
-    private final Span orderIdLabel = new Span();
-    private final Span customerLabel = new Span();
-    private final Span productsLabel = new Span();
-    private final Span totalLabel = new Span();
+    private Order order;
 
+    @Autowired
     public DetailView(OrderService orderService) {
-
         this.orderService = orderService;
 
-        VerticalLayout detailsLayout = new VerticalLayout();
-        detailsLayout.add(new H3("Order Details"));
-        detailsLayout.add(orderIdLabel, customerLabel, productsLabel, totalLabel);
-
-        Button backButton = new Button("Terug", event -> {
-            UI.getCurrent().navigate("search");
-        });
-
-
-        add(detailsLayout, backButton);
-
-        setOrderDetails();
-
-    }
-
-    private void setOrderDetails() {
-        Optional<String> orderId = UI.getCurrent().getInternals().getActiveViewLocation().getQueryParameters().getParameters().get("orderId")
-                .stream().findFirst();
-        if (orderId.isPresent()) {
-            Order order = orderService.getOrderById(Long.valueOf(orderId.get()));
-            orderIdLabel.setText("Bestel-ID: " + order.getId());
-            customerLabel.setText("Klantnummer: " + order.getId());
-            productsLabel.setText("Aantal Producten: " + order.getProductQuantity());
-            totalLabel.setText("Totaal Bedrag: €" + order.getTotalAmount());
-        } else {
-            orderIdLabel.setText("Bestelling niet gevonden.");
-        }
+        setPadding(true);
+        setSpacing(true);
     }
 
     @Override
-    public void beforeEnter(BeforeEnterEvent event) {
-        // Haal de parameter "orderId" op uit de URL
-        String orderId = event.getRouteParameters().get("orderId").orElse(null);
-
+    public void setParameter(BeforeEvent event, @OptionalParameter Long orderId) {
         if (orderId != null) {
-            setOrderDetails();
+            // Haal het order op basis van ID
+            Optional<Order> optionalOrder = orderService.getOrderById(orderId);
+            if (optionalOrder.isPresent()) {
+                this.order = optionalOrder.get();
+                setupLayout();
+            } else {
+                add(new H2("Bestelling niet gevonden."));
+            }
         } else {
-            orderIdLabel.setText("Geen bestelling gevonden.");
+            add(new H2("Geen bestelling geselecteerd."));
         }
+    }
+
+    private void setupLayout() {
+        add(new H2("Bestelling ID: " + order.getId()));
+        add(new Div("Klant: " + order.getCustomerName()));
+        add(new Div("Datum: " + order.getOrderDate()));
+        add(new Div("Totaal: €" + order.getTotalAmount()));
+        add(new Div("Afgeleverd: " + (order.isDelivered() ? "Ja" : "Nee")));
+
+        // Voeg terugknop toe
+        Button backButton = new Button("Terug naar overzicht", event -> getUI().ifPresent(ui -> ui.navigate(SearchView.class)));
+        add(backButton);
     }
 
 }

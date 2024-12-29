@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class OrderRepositoryImpl implements OrderRepository {
@@ -28,6 +29,10 @@ public class OrderRepositoryImpl implements OrderRepository {
         @Override
         public List<String> findProductNamesContaining(String searchTerm) {
                 return List.of();
+        }
+        @Override
+        public Optional<Order> getOrderById(Long id) {
+                return Optional.ofNullable(entityManager.find(Order.class, id));
         }
 
 

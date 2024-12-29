@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -58,11 +59,8 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Order getOrderById(Long orderId) {
-        return orders.stream()
-                .filter(order -> order.getId().equals(orderId))
-                .findFirst()
-                .orElse(null);
+    public Optional<Order> getOrderById(Long orderId) {
+        return orderRepository.getOrderById(orderId);
     }
 
     @Override

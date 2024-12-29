@@ -3,6 +3,7 @@ package be.ucll.ui;
 import be.ucll.entities.Order;
 import be.ucll.services.MailService;
 import be.ucll.services.OrderService;
+import be.ucll.spring.JmsProducer;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -38,8 +39,11 @@ public class SearchView extends VerticalLayout {
 
     @Autowired
     private MailService emailService;
+    @Autowired
+    private JmsProducer jmsProducer;
 
     public SearchView(OrderService orderService) {
+
 
 
         this.orderService = orderService;
@@ -49,17 +53,49 @@ public class SearchView extends VerticalLayout {
         Button searchButton = new Button("Zoeken", event -> searchOrders());
         Button clearButton = new Button("Wissen", event -> clearFields());
         Button emailButton = new Button("Stuur Email", event -> {
+            List<Order> selectedOrders = orderGrid.getListDataView().getItems().toList();
+
+            if (selectedOrders.isEmpty()) {
+                Notification.show("Selecteer minstens één bestelling.");
+                return;
+            }
+
+//            List<Long> productIds = selectedOrders.stream()
+//                    .flatMap(order -> order.getProducts().stream().map(product -> product.getId()))
+//                    .toList();
+            List<String> gridData = selectedOrders.stream()
+                    .map(order -> String.format("<td>%d</td><td>%s</td><td>%.2f</td><td>%s</td>",
+                            order.getId(),
+                            order.getCustomerName(),
+                            order.getTotalAmount(),
+                            order.isDelivered() ? "Ja" : "Nee"))
+                    .toList();
+
+            String email = emailField.getValue();
+            if (email == null || email.isEmpty() || !email.contains("@")) {
+                Notification.show("Vul een geldig e-mailadres in.");
+                return;
+            }
+
+            // Verstuur asynchroon via JMS
             try {
-                sendEmailWithProductIds();
+                jmsProducer.sendMessage(email,gridData);
+                emailService.sendmail(email, gridData);
             } catch (MessagingException e) {
                 throw new RuntimeException(e);
             }
+            Notification.show("E-mail wordt asynchroon verzonden naar " + email + "!");
         });
 
 
         Div searchForm = new Div(productNameField, minAmountField, maxAmountField, productCountField, deliveredCheckbox, emailField, searchButton, clearButton, emailButton);
         searchForm.addClassName("search-form");
         searchForm.getStyle().set("margin-bottom", "20px");
+
+        orderGrid.addItemClickListener(event -> {
+            Long orderId = event.getItem().getId();
+            getUI().ifPresent(ui -> ui.navigate("details/" + orderId));
+        });
 
         //configureGrid();
         loadOrders();
@@ -191,30 +227,7 @@ public class SearchView extends VerticalLayout {
         }
     }
 
-    private void sendEmailWithProductIds() throws MessagingException {
-        List<Order> selectedOrders = orderGrid.getSelectedItems().stream().toList();
 
-        if (selectedOrders.isEmpty()) {
-            Notification.show("Selecteer minstens één bestelling.");
-            return;
-        }
-
-        // Verzamel product-ID's
-        List<Long> productIds = selectedOrders.stream()
-                .flatMap(order -> order.getProducts().stream().map(product -> product.getId()))
-                .toList();
-
-        // Controleer e-mailadres
-        String email = emailField.getValue();
-        if (email == null || email.isEmpty() || !email.contains("@")) {
-            Notification.show("Vul een geldig e-mailadres in.");
-            return;
-        }
-
-        // E-mail versturen
-        emailService.sendProductIds(email, productIds);
-        Notification.show("E-mail wordt verzonden naar " + email + "!");
-    }
 
 
 
