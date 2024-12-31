@@ -10,7 +10,6 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.NumberField;
@@ -23,7 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Route(value = "", layout = MainLayout.class)
+@Route(value = "search", layout = MainLayout.class)
 @PageTitle("Search Orders")
 public class SearchView extends VerticalLayout {
 
@@ -36,7 +35,6 @@ public class SearchView extends VerticalLayout {
 
     private final Grid<Order> orderGrid = new Grid<>(Order.class, false);
     private final OrderService orderService;
-    private Binder<Order> orderBinder = new Binder<>(Order.class);
 
     @Autowired
     private MailService emailService;
@@ -52,69 +50,15 @@ public class SearchView extends VerticalLayout {
         configureFields();
         configureGrid();
 
-        // Knoppen aanmaken
         Button searchButton = new Button("Zoeken", event -> searchOrders());
         Button clearButton = new Button("Wissen", event -> clearFields());
-        Button emailButton = new Button("Stuur Email", event -> {
-            List<Order> selectedOrders = orderGrid.getListDataView().getItems().toList();
+        Button emailButton = new Button("Stuur Email", event -> sendEmail());
 
-            if (selectedOrders.isEmpty()) {
-                Notification.show("Selecteer minstens één bestelling.");
-                return;
-            }
-
-//            List<Long> productIds = selectedOrders.stream()
-//                    .flatMap(order -> order.getProducts().stream().map(product -> product.getId()))
-//                    .toList();
-            List<String> gridData = selectedOrders.stream()
-                    .map(order -> String.format("<td>%d</td><td>%s</td><td>%.2f</td><td>%s</td>",
-                            order.getId(),
-                            order.getCustomerName(),
-                            order.getTotalAmount(),
-                            order.isDelivered() ? "Ja" : "Nee"))
-                    .toList();
-
-            String email = emailField.getValue();
-            if (email == null || email.isEmpty() || !email.contains("@")) {
-                Notification.show("Vul een geldig e-mailadres in.");
-                return;
-            }
-
-            // Verstuur asynchroon via JMS
-            try {
-                jmsProducer.sendMessage(email,gridData);
-                emailService.sendmail(email, gridData);
-            } catch (MessagingException e) {
-                throw new RuntimeException(e);
-            }
-            Notification.show("E-mail wordt asynchroon verzonden naar " + email + "!");
-        });
-
-        productNameField.setAllowCustomValue(true);
-        productNameField.setPlaceholder("Typ productnaam...");
-        productNameField.addCustomValueSetListener(event -> {
-            String customValue = event.getDetail();
-            productNameField.setValue(customValue); // Stelt custom waarde in
-            Notification.show("Geselecteerde waarde: " + customValue);
-        });
-
-        productNameField.setItems("Muis", "Toetsenbord", "Laptop");
-
-
-        productNameField.addValueChangeListener(event -> {
-            String searchTerm = event.getValue(); // Haal zoekterm op
-            if (searchTerm != null && !searchTerm.isEmpty()) {
-
-                if (!searchTerm.equals(productNameField.getValue())) {
-
-                    List<String> suggestions = orderService.findProductByName(searchTerm);
-                    System.out.println("UI ComboBox Results: " + suggestions);
-                    productNameField.setItems(suggestions);
-                }
-            }
-        });
-
-
+        // Instellen van het productnaam ComboBox veld
+        productNameField.setAllowCustomValue(false); // Zorgt ervoor dat geen custom waarde kan worden ingevoerd
+        productNameField.setItems("Muis", "Toetsenbord", "Laptop"); // De lijst van de 3 vaste waarden
+        productNameField.setPlaceholder("Selecteer een product...");
+        productNameField.addValueChangeListener(event -> searchOrders()); // Roep zoekfunctie aan bij waarde verandering
 
         Div searchForm = new Div(productNameField, minAmountField, maxAmountField, productCountField, deliveredCheckbox, emailField, searchButton, clearButton, emailButton);
         searchForm.addClassName("search-form");
@@ -130,6 +74,7 @@ public class SearchView extends VerticalLayout {
     }
 
     private void configureBinder() {
+        Binder<Order> orderBinder = new Binder<>(Order.class);
         orderBinder.forField(minAmountField)
                 .withValidator(value -> value == null || value >= 0, "Minimum bedrag moet positief zijn");
         orderBinder.forField(maxAmountField)
@@ -148,57 +93,20 @@ public class SearchView extends VerticalLayout {
         minAmountField.addBlurListener(event -> validateField(minAmountField));
         maxAmountField.addBlurListener(event -> validateField(maxAmountField));
         productCountField.addBlurListener(event -> validateField(productCountField));
-        emailField.addBlurListener(event -> {
-            String emailRegex = "^[a-zA-Z]+@[a-zA-Z]+\\.[a-zA-Z]{2,}$";
-            if (!emailField.getValue().matches(emailRegex)) {
-                emailField.setInvalid(true);
-            } else {
-                emailField.setInvalid(false);
-            }
-        });
-        productCountField.addBlurListener(event -> {
-            Double value = productCountField.getValue();
-            if (value == null || value < 0 || value % 1 != 0) {
-                productCountField.setErrorMessage("Aantal moet een geheel getal zijn.");
-                productCountField.setInvalid(true);
-            } else {
-                productCountField.setInvalid(false);
-            }
-        });
+    }
 
-        productNameField.setAllowCustomValue(true);
-        productNameField.setPlaceholder("Typ productnaam...");
-        productNameField.addCustomValueSetListener(event -> {
-            String customValue = event.getDetail();
-            productNameField.setValue(customValue);
-            Notification.show("Geselecteerde waarde: " + customValue);
-        });
-        productNameField.addValueChangeListener(event -> {
-            String searchTerm = event.getValue();
-            if (searchTerm != null && !searchTerm.isEmpty()) {
-                List<String> suggestions = orderService.findProductByName(searchTerm);
-                productNameField.setItems(suggestions);
-            }
-        });
-
-        productNameField.addCustomValueSetListener(event -> {
-            String customValue = event.getDetail();
-            productNameField.setValue(customValue); // Stelt de custom waarde in als geselecteerde waarde
-            Notification.show("Geselecteerde waarde: " + customValue);
-
-
-            searchOrders();
-        });
+    private void searchProducts(String searchTerm) {
+        List<String> suggestions = orderService.findProductByName(searchTerm);
+        productNameField.setItems(suggestions); // Werk de lijst van suggesties bij
     }
 
     private void configureGrid() {
         orderGrid.addColumn(Order::getId).setHeader("ID");
         orderGrid.addColumn(Order::getCustomerName).setHeader("Klant");
-        orderGrid.addColumn(order -> order.getProducts().size()).setHeader("aantal Producten");
+        orderGrid.addColumn(order -> order.getProducts().size()).setHeader("Aantal Producten");
         orderGrid.addColumn(Order::isDelivered).setHeader("Afgeleverd");
         orderGrid.addColumn(Order::getTotalAmount).setHeader("Totaalbedrag (€)");
 
-        // Producten weergeven
         orderGrid.addColumn(order ->
                 order.getProducts().stream()
                         .map(product -> product.getName() + " (€" + product.getPrice() + ")")
@@ -255,8 +163,9 @@ public class SearchView extends VerticalLayout {
         deliveredCheckbox.clear();
         emailField.clear();
     }
+
     private void validateField(NumberField field) {
-        if (!orderBinder.validate().isOk()) {
+        if (field.isInvalid()) {
             field.setInvalid(true);
         } else {
             field.setInvalid(false);

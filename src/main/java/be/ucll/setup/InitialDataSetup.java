@@ -35,7 +35,10 @@ public class InitialDataSetup {
         transactionTemplate.execute(e -> {
             // Maak gebruiker
             User user1 = new User("test", "test", "reniers.joren@gmail.com");
-            entityManager.persist(user1); // Persist gebruiker eerst
+            entityManager.persist(user1);
+            entityManager.flush();
+            System.out.println("User1 opgeslagen: " + user1.getUsername() + ", " + user1.getPassword() + ", " + user1.getEmail());
+
 
             // Maak eerste order
             Order order1 = new Order("John Doe", LocalDate.now(), 2, 65.98, true, user1);

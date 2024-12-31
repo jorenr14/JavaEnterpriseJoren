@@ -14,7 +14,7 @@ public class User {
     private String username;
     private String password;
     private String email;
-    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.EAGER)
     private List<Order> orders = new ArrayList<>();
 
 
@@ -22,6 +22,9 @@ public class User {
     }
 
     public User(String username, String password, String email) {
+        this.username = username;
+        this.password = password;
+        this.email = email;
     }
 
     public Long getId() {

@@ -6,4 +6,5 @@ import java.util.Collection;
 
 public interface UserService {
     Collection<User> findAll();
+    User authenticate(String username, String password);
 }

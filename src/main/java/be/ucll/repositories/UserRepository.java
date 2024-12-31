@@ -6,4 +6,5 @@ import java.util.Collection;
 
 public interface UserRepository {
     Collection<User> findAll();
+    User findByUsername(String username);
 }

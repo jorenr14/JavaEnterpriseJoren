@@ -1,6 +1,8 @@
 package be.ucll.ui;
 
+import be.ucll.entities.User;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
@@ -16,7 +18,7 @@ import be.ucll.services.UserService;
 
 
 
-@Route(value = "login",layout = MainLayout.class)
+@Route(value = "",layout = MainLayout.class)
 @PageTitle("login")
 public class LoginView extends VerticalLayout {
 
@@ -24,14 +26,26 @@ public class LoginView extends VerticalLayout {
 	private UserService userService;
 
 	public LoginView() {
-
 		TextField username = new TextField("Gebruikersnaam");
 		PasswordField password = new PasswordField("Wachtwoord");
 		Button loginButton = new Button("Inloggen", event -> {
+			String enteredUsername = username.getValue();
+			String enteredPassword = password.getValue();
 
-			UI.getCurrent().navigate("search");
+			System.out.println("Ingevoerde gebruikersnaam: " + enteredUsername);
+
+
+			User user = userService.authenticate(enteredUsername, enteredPassword);
+
+			if (user != null) {
+
+				UI.getCurrent().navigate("search");
+			} else {
+				Notification.show("Ongeldige gebruikersnaam of wachtwoord", 3000, Notification.Position.MIDDLE);
+			}
 		});
 
 		add(username, password, loginButton);
 	}
+
 }
