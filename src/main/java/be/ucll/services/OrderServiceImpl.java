@@ -16,15 +16,14 @@ import java.util.Optional;
 @Transactional
 public class OrderServiceImpl implements OrderService {
 
-    private final List<Order> orders;
-    public OrderServiceImpl() {
-        this.orders = new ArrayList<>();
-
-
-    }
 
     @Autowired
     private OrderRepository orderRepository;
+
+    private final List<Order> orders;
+    public OrderServiceImpl() {
+        this.orders = new ArrayList<>();
+    }
 
     @Override
     public Collection<Order> findAll() {
@@ -34,28 +33,36 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public List<Order> findOrders(String productName, Double minAmount, Double maxAmount, Boolean delivered, String email) {
         return orderRepository.findAll().stream().filter(order -> {
-                    boolean matches = true;
+            boolean matches = true;
 
-                    if (productName != null && !productName.isEmpty()) {
-                        matches &= order.getProducts().stream()
-                                .anyMatch(product -> product.getName().contains(productName));
-                    }
+            // Filter op productnaam (ENKEL als de order dit product heeft)
+            if (productName != null && !productName.isEmpty()) {
+                matches &= order.getProducts().stream()
+                        .anyMatch(product -> product.getName().equalsIgnoreCase(productName)); // Exacte match
+            }
 
-                    if (minAmount != null) {
-                        matches &= order.getTotalAmount() >= minAmount;
-                    }
+            // Filter op minimum bedrag
+            if (minAmount != null) {
+                matches &= order.getTotalAmount() >= minAmount;
+            }
 
-                    if (maxAmount != null) {
-                        matches &= order.getTotalAmount() <= maxAmount;
-                    }
+            // Filter op maximum bedrag
+            if (maxAmount != null) {
+                matches &= order.getTotalAmount() <= maxAmount;
+            }
 
-                    if (delivered != null) {
-                        matches &= order.isDelivered()==delivered;
-                    }
+            // Filter op afleverstatus
+            if (delivered != null) {
+                matches &= order.isDelivered() == delivered;
+            }
 
-                    return matches;
-                })
-                .toList();
+            // Filter op e-mailadres
+            if (email != null && !email.isEmpty()) {
+                matches &= order.getUser().getEmail().equalsIgnoreCase(email);
+            }
+
+            return matches; // Retourneer alleen orders die aan ALLE criteria voldoen
+        }).toList();
     }
 
     @Override
@@ -64,8 +71,9 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<String> findProductNames(String productName) {
-        return List.of();
+    public List<String> findProductByName(String productName) {
+        List<String> results = orderRepository.findProductByName(productName);
+        return results;
     }
 
 

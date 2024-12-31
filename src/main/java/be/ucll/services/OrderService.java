@@ -14,6 +14,6 @@ public interface OrderService {
 
     Optional<Order> getOrderById(Long orderId);
 
-    List<String> findProductNames(String productName);
+    List<String> findProductByName(String productName);
 
 }

@@ -23,22 +23,22 @@ import jakarta.persistence.PersistenceContext;
 @Component
 public class InitialDataSetup {
 
-	@Autowired
-	private PlatformTransactionManager platformTransactionManager;
+    @Autowired
+    private PlatformTransactionManager platformTransactionManager;
 
-	@PersistenceContext
-	private EntityManager entityManager;
+    @PersistenceContext
+    private EntityManager entityManager;
 
-	@PostConstruct
-	public void setup() {
-		TransactionTemplate transactionTemplate = new TransactionTemplate(platformTransactionManager);
-		transactionTemplate.execute(e -> {
+    @PostConstruct
+    public void setup() {
+        TransactionTemplate transactionTemplate = new TransactionTemplate(platformTransactionManager);
+        transactionTemplate.execute(e -> {
             // Maak gebruiker
             User user1 = new User("test", "test", "reniers.joren@gmail.com");
             entityManager.persist(user1); // Persist gebruiker eerst
 
             // Maak eerste order
-            Order order1 = new Order("John Doe", LocalDate.now(), 2, 51.98, true, user1);
+            Order order1 = new Order("John Doe", LocalDate.now(), 2, 65.98, true, user1);
             Order order2 = new Order("Jane Doe", LocalDate.now(), 1, 999.99, false, user1);
 
             // Voeg orders toe aan de gebruiker
@@ -69,7 +69,9 @@ public class InitialDataSetup {
             System.out.println("Order toegevoegd: " + order1.getCustomerName() + ", Totaal: " + order1.getTotalAmount());
             System.out.println("Order toegevoegd: " + order2.getCustomerName() + ", Totaal: " + order2.getTotalAmount());
 
+            System.out.println("Producten voor Order 1: " + order1.getProducts());
+            System.out.println("Producten voor Order 2: " + order2.getProducts());
             return null; // Commit transactie
         });
-	}
+    }
 }

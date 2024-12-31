@@ -27,13 +27,20 @@ public class OrderRepositoryImpl implements OrderRepository {
         }
 
         @Override
-        public List<String> findProductNamesContaining(String searchTerm) {
-                return List.of();
-        }
-        @Override
         public Optional<Order> getOrderById(Long id) {
                 return Optional.ofNullable(entityManager.find(Order.class, id));
         }
+
+        @Override
+        public List<String> findProductByName(String productname) {
+                List<String> results = entityManager.createQuery(
+                                "SELECT DISTINCT p.name FROM Product p WHERE LOWER(p.name) LIKE LOWER(:productname)", String.class)
+                        .setParameter("productname", productname + "%") // Gebruik parameter voor LIKE-query
+                        .getResultList();
+
+                return results;
+        }
+
 
 
 }

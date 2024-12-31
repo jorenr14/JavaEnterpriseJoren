@@ -22,11 +22,9 @@ public class JmsProducer {
     }
 
 
-    @Value("email-queue")
+    @Value("${jms.queue-name}")
     private String queueName ;
 
-    @Value("${active-mq.topic:default-topic}")
-    private String topic ;
 
     public void sendMessage(String email, List<String> gridData) {
         String message = email + "::" + String.join(";", gridData);

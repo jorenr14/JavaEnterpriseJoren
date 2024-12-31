@@ -18,16 +18,18 @@ import java.util.stream.Collectors;
 
 @Component
 public class JmsConsumer {
+
     @Autowired
     private MailService mailService;
-    @Value("email-queue")
+
+    @Value("${jms.queue-name}")
     private String queueName ;
 
     public JmsConsumer(MailService mailService) {
         this.mailService = mailService;
     }
 
-    @JmsListener(destination = "email-queue")
+    @JmsListener(destination = "${jms.queue-name}")
     public void receiveMessage(String message) {
         System.out.println("Bericht ontvangen: " + message);
 
