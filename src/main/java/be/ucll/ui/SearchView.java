@@ -147,12 +147,10 @@ public class SearchView extends VerticalLayout {
             return;
         }
 
-        try {
+
             jmsProducer.sendMessage(email, gridData);
             emailService.sendmail(email, gridData);
-        } catch (MessagingException e) {
-            throw new RuntimeException(e);
-        }
+
         Notification.show("E-mail wordt asynchroon verzonden naar " + email + "!");
     }
 

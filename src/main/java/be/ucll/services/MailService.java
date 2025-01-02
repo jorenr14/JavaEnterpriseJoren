@@ -3,6 +3,7 @@ package be.ucll.services;
 import jakarta.mail.MessagingException;
 
 import jakarta.mail.internet.MimeMessage;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -13,24 +14,29 @@ import java.util.List;
 @Service
 public class MailService {
 
+    @Autowired
     private JavaMailSender mailSender;
 
+    @Autowired
+    public MailService(JavaMailSender mailSender) {
+        this.mailSender = mailSender;
+    }
 
+     public void sendmail(String email, List<String> productIds)  {
 
-    public void sendmail(String email, List<String> productIds) throws MessagingException {
-        try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+           // MimeMessage message = mailSender.createMimeMessage();
+            SimpleMailMessage message = new SimpleMailMessage();
+            //MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
-            helper.setTo(email);
-            helper.setSubject("Uw productbestelling");
-            helper.setText("Beste gebruiker, hieronder de product-ID's van uw bestelling: " + productIds);
+            message.setFrom("reniers.joren@gmail.com");
+
+            message.setTo(email);
+            message.setSubject("Uw productbestelling");
+            message.setText("Beste gebruiker, hieronder de product-ID's van uw bestelling: " + productIds);
 
             mailSender.send(message);
             System.out.println("E-mail verzonden naar: " + email);
-        } catch (MessagingException e) {
-            e.printStackTrace();
-        }
+
 
             System.out.println("E-mail verzonden naar: " + email);
     }
