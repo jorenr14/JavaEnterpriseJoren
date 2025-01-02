@@ -137,22 +137,33 @@ public class SearchView extends VerticalLayout {
             return;
         }
 
+        // Correcte opmaak voor productgegevens
         List<String> gridData = selectedOrders.stream()
-                .map(order -> String.format("%s: €%.2f", order.getCustomerName(), order.getTotalAmount()))
+                .map(order -> {
+                    String productDetails = order.getProducts().stream()
+                            .map(product -> product.getName() + " (€" + product.getPrice() + ")")
+                            .collect(Collectors.joining(", "));
+                    return String.format("%s: €%.2f (%s)",
+                            order.getCustomerName(),
+                            order.getTotalAmount(),
+                            productDetails);
+                })
                 .toList();
 
+        // Controleer e-mailadres
         String email = emailField.getValue();
         if (email == null || email.isEmpty() || !email.contains("@")) {
             Notification.show("Vul een geldig e-mailadres in.");
             return;
         }
 
-
-            jmsProducer.sendMessage(email, gridData);
-            emailService.sendmail(email, gridData);
+        // Verstuur e-mail
+        jmsProducer.sendMessage(email, gridData);
+        emailService.sendmail(email, gridData);
 
         Notification.show("E-mail wordt asynchroon verzonden naar " + email + "!");
     }
+
 
     private void clearFields() {
         productNameField.clear();

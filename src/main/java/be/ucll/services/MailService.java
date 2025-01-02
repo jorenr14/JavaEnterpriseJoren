@@ -32,7 +32,9 @@ public class MailService {
 
             message.setTo(email);
             message.setSubject("Uw productbestelling");
-            message.setText("Beste gebruiker, hieronder de product-ID's van uw bestelling: " + productIds);
+            message.setText("Beste Klant,\n\nHieronder vindt u de details van uw bestelling:\n\n"
+                 + String.join("\n", productIds) + "\n\nMet vriendelijke groeten,\nUw Javastore");
+
 
             mailSender.send(message);
             System.out.println("E-mail verzonden naar: " + email);
