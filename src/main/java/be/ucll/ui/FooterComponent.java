@@ -2,9 +2,12 @@ package be.ucll.ui;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
 @Component
+@Scope(value = "vaadin-ui", proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class FooterComponent extends Div {
 
     public FooterComponent() {

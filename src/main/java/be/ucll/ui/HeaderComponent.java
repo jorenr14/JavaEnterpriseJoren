@@ -18,21 +18,25 @@ public class HeaderComponent extends Div {
         setId("header");
         addClassName("header");
 
+        setWidthFull();
+        addClassName("header");
 
         Span shopInfo = new Span("Welkom bij Enterprise Store!");
+        shopInfo.getStyle().set("margin-left", "10px");
 
         Button logoutButton = new Button("Logout", event -> {
             UI.getCurrent().navigate("login");
-            // Invalidate session (optioneel)
             VaadinSession.getCurrent().close();
         });
+        logoutButton.setId("logout-button");
 
-        logoutButton.getStyle().set("margin-left", "auto");
 
         HorizontalLayout layout = new HorizontalLayout(shopInfo, logoutButton);
         layout.setWidthFull();
         layout.setAlignItems(FlexComponent.Alignment.CENTER);
+        layout.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
 
         add(layout);
+
     }
 }

@@ -54,15 +54,24 @@ public class SearchView extends VerticalLayout {
         Button clearButton = new Button("Wissen", event -> clearFields());
         Button emailButton = new Button("Stuur Email", event -> sendEmail());
 
-        // Instellen van het productnaam ComboBox veld
-        productNameField.setAllowCustomValue(false); // Zorgt ervoor dat geen custom waarde kan worden ingevoerd
-        productNameField.setItems("Muis", "Toetsenbord", "Laptop"); // De lijst van de 3 vaste waarden
-        productNameField.setPlaceholder("Selecteer een product...");
-        productNameField.addValueChangeListener(event -> searchOrders()); // Roep zoekfunctie aan bij waarde verandering
 
-        Div searchForm = new Div(productNameField, minAmountField, maxAmountField, productCountField, deliveredCheckbox, emailField, searchButton, clearButton, emailButton);
+        productNameField.setAllowCustomValue(false);
+        productNameField.setItems("Muis", "Toetsenbord", "Laptop");
+        productNameField.setPlaceholder("Selecteer een product...");
+        productNameField.addValueChangeListener(event -> searchOrders());
+
+
+        Div searchForm = new Div(productNameField, minAmountField, maxAmountField,
+                productCountField, deliveredCheckbox, emailField,
+                searchButton, clearButton, emailButton);
+
         searchForm.addClassName("search-form");
-        searchForm.getStyle().set("margin-bottom", "20px");
+        searchForm.getStyle()
+                .set("display", "grid")
+                .set("grid-template-columns", "repeat(3, 1fr)")
+                .set("gap", "10px")
+                .set("margin-bottom", "20px");
+
 
         orderGrid.addItemClickListener(event -> {
             Long orderId = event.getItem().getId();
@@ -70,7 +79,8 @@ public class SearchView extends VerticalLayout {
         });
 
         add(searchForm, orderGrid);
-        loadOrders(); // Laad initiële data
+        add(new FooterComponent());
+        loadOrders();
     }
 
     private void configureBinder() {
@@ -97,7 +107,7 @@ public class SearchView extends VerticalLayout {
 
     private void searchProducts(String searchTerm) {
         List<String> suggestions = orderService.findProductByName(searchTerm);
-        productNameField.setItems(suggestions); // Werk de lijst van suggesties bij
+        productNameField.setItems(suggestions);
     }
 
     private void configureGrid() {
@@ -119,15 +129,66 @@ public class SearchView extends VerticalLayout {
     }
 
     private void searchOrders() {
-        List<Order> orders = orderService.findOrders(
-                productNameField.getValue(),
-                minAmountField.getValue(),
-                maxAmountField.getValue(),
-                deliveredCheckbox.getValue(),
-                emailField.getValue()
-        );
+        loadOrders();
+
+        String productName = productNameField.getValue();
+        Double minAmount = minAmountField.getValue();
+        Double maxAmount = maxAmountField.getValue();
+        Boolean delivered = deliveredCheckbox.getValue();
+        Double productCount = productCountField.getValue();
+        String email = emailField.getValue();
+
+
+
+        List<Order> orders = orderService.findAll().stream()
+                .filter(order -> {
+                    boolean matches = true;
+
+
+                    if (productName != null && !productName.isEmpty()) {
+                        matches &= order.getProducts().stream()
+                                .anyMatch(product -> product.getName().toLowerCase().contains(productName.toLowerCase()));
+                    }
+
+
+                    if (minAmount != null) {
+                        matches &= order.getTotalAmount() >= minAmount;
+                    }
+
+
+                    if (maxAmount != null) {
+                        System.out.println("Order ID: " + order.getId());
+                        System.out.println("Totaal bedrag: " + order.getTotalAmount());
+                        System.out.println("Max bedrag filter: " + maxAmount);
+                        matches &= order.getTotalAmount() <= maxAmount;
+                        System.out.println("Match status na maxAmount-filter: " + matches);
+                    }
+
+                    if (productCount != null && productCount % 1 == 0) {
+                        matches &= order.getProducts().size() == productCount.intValue();
+                    }
+
+
+
+                    if (delivered != null) {
+                        matches &= order.isDelivered() == delivered;
+                    }
+
+                    return matches;
+                })
+                .collect(Collectors.toList());
+
+        System.out.println("Aantal gevonden orders: " + orders.size());
+        orders.forEach(order -> System.out.println("Matched Order: " + order.getCustomerName() + ", Totaal: " + order.getTotalAmount()));
+
+
         orderGrid.setItems(orders);
+
+        if (orders.isEmpty()) {
+            Notification.show("Geen resultaten gevonden.");
+        }
     }
+
 
     private void sendEmail() {
         List<Order> selectedOrders = orderGrid.getListDataView().getItems().toList();
@@ -137,7 +198,7 @@ public class SearchView extends VerticalLayout {
             return;
         }
 
-        // Correcte opmaak voor productgegevens
+
         List<String> gridData = selectedOrders.stream()
                 .map(order -> {
                     String productDetails = order.getProducts().stream()
@@ -169,8 +230,10 @@ public class SearchView extends VerticalLayout {
         productNameField.clear();
         minAmountField.clear();
         maxAmountField.clear();
+        productCountField.clear();
         deliveredCheckbox.clear();
         emailField.clear();
+        loadOrders();
     }
 
     private void validateField(NumberField field) {

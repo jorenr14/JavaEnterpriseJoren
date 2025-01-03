@@ -2,6 +2,7 @@ package be.ucll.ui;
 
 import be.ucll.entities.User;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
@@ -26,8 +27,11 @@ public class LoginView extends VerticalLayout {
 	private UserService userService;
 
 	public LoginView() {
+		H1 title = new H1("Inloggen");
+
 		TextField username = new TextField("Gebruikersnaam");
 		PasswordField password = new PasswordField("Wachtwoord");
+
 		Button loginButton = new Button("Inloggen", event -> {
 			String enteredUsername = username.getValue();
 			String enteredPassword = password.getValue();
@@ -44,6 +48,13 @@ public class LoginView extends VerticalLayout {
 				Notification.show("Ongeldige gebruikersnaam of wachtwoord", 3000, Notification.Position.MIDDLE);
 			}
 		});
+		Div loginBox = new Div(title, username, password, loginButton);
+		loginBox.addClassName("login-box");
+
+		Div loginContainer = new Div(loginBox);
+		loginContainer.addClassName("login-container");
+
+		add(new FooterComponent());
 
 		add(username, password, loginButton);
 	}
