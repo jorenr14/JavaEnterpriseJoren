@@ -48,15 +48,12 @@ public class LoginView extends VerticalLayout {
 				Notification.show("Ongeldige gebruikersnaam of wachtwoord", 3000, Notification.Position.MIDDLE);
 			}
 		});
-		Div loginBox = new Div(title, username, password, loginButton);
-		loginBox.addClassName("login-box");
 
-		Div loginContainer = new Div(loginBox);
-		loginContainer.addClassName("login-container");
 
 		add(new FooterComponent());
 
-		add(username, password, loginButton);
+		add(title,username, password, loginButton);
+		addClassName("login-center");
 	}
 
 }
