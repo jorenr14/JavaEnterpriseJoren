@@ -10,18 +10,23 @@ public class Product {
     private Long id;
     private String name;
     private Double price;
+    private String description;
     @ManyToOne
     @JoinColumn(name = "order_id")
     private Order order;
 
-    public Product(String name, double price, Order order) {
+    public Product(String name, double price,String description, Order order) {
         this.name = name;
         this.price = price;
+        this.description = description;
         this.order = order;
     }
 
     public Product() {
 
+    }
+
+    public Product(Long id, String name, String description, Double price) {
     }
 
     public Long getId() {
@@ -54,5 +59,17 @@ public class Product {
 
     public void setOrder(Order order) {
         this.order = order;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+    @Override
+    public String toString() {
+        return String.format("Product[ID=%d, Naam=%s, Beschrijving=%s, Prijs=%.2f]", id, name, description, price);
     }
 }

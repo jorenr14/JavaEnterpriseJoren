@@ -20,14 +20,14 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public User findByUsername(String username) {
-        // Zoek een gebruiker op basis van de gebruikersnaam
+
         try {
             return entityManager.createQuery("SELECT u FROM User u WHERE u.username = :username", User.class)
                     .setParameter("username", username)
                     .getSingleResult();
         } catch (Exception e) {
             System.out.println("Fout bij het ophalen van de gebruiker: " + e.getMessage());
-            return null; // Als de gebruiker niet wordt gevonden
+            return null;
         }
     }
 }

@@ -35,33 +35,30 @@ public class OrderServiceImpl implements OrderService {
         return orderRepository.findAll().stream().filter(order -> {
             boolean matches = true;
 
-            // Filter op productnaam (ENKEL als de order dit product heeft)
             if (productName != null && !productName.isEmpty()) {
                 matches &= order.getProducts().stream()
                         .anyMatch(product -> product.getName().equalsIgnoreCase(productName)); // Exacte match
             }
 
-            // Filter op minimum bedrag
+
             if (minAmount != null) {
                 matches &= order.getTotalAmount() >= minAmount;
             }
 
-            // Filter op maximum bedrag
+
             if (maxAmount != null) {
                 matches &= order.getTotalAmount() <= maxAmount;
             }
 
-            // Filter op afleverstatus
             if (delivered != null) {
                 matches &= order.isDelivered() == delivered;
             }
 
-            // Filter op e-mailadres
             if (email != null && !email.isEmpty()) {
                 matches &= order.getUser().getEmail().equalsIgnoreCase(email);
             }
 
-            return matches; // Retourneer alleen orders die aan ALLE criteria voldoen
+            return matches;
         }).toList();
     }
 

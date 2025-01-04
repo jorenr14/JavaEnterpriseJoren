@@ -138,45 +138,10 @@ public class SearchView extends VerticalLayout {
         Double productCount = productCountField.getValue();
         String email = emailField.getValue();
 
+        List<Order> orders = orderService.findOrders(
+                productName, minAmount, maxAmount, delivered, email
+        );
 
-
-        List<Order> orders = orderService.findAll().stream()
-                .filter(order -> {
-                    boolean matches = true;
-
-
-                    if (productName != null && !productName.isEmpty()) {
-                        matches &= order.getProducts().stream()
-                                .anyMatch(product -> product.getName().toLowerCase().contains(productName.toLowerCase()));
-                    }
-
-
-                    if (minAmount != null) {
-                        matches &= order.getTotalAmount() >= minAmount;
-                    }
-
-
-                    if (maxAmount != null) {
-                        System.out.println("Order ID: " + order.getId());
-                        System.out.println("Totaal bedrag: " + order.getTotalAmount());
-                        System.out.println("Max bedrag filter: " + maxAmount);
-                        matches &= order.getTotalAmount() <= maxAmount;
-                        System.out.println("Match status na maxAmount-filter: " + matches);
-                    }
-
-                    if (productCount != null && productCount % 1 == 0) {
-                        matches &= order.getProducts().size() == productCount.intValue();
-                    }
-
-
-
-                    if (delivered != null) {
-                        matches &= order.isDelivered() == delivered;
-                    }
-
-                    return matches;
-                })
-                .collect(Collectors.toList());
 
         System.out.println("Aantal gevonden orders: " + orders.size());
         orders.forEach(order -> System.out.println("Matched Order: " + order.getCustomerName() + ", Totaal: " + order.getTotalAmount()));

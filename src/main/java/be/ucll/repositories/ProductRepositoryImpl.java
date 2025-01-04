@@ -16,6 +16,6 @@ public class ProductRepositoryImpl implements ProductRepository {
 
 	@Override
 	public Collection<Product> findAll() {
-		return entityManager.createQuery("from Product").getResultList();
+		return entityManager.createQuery("SELECT p FROM Product p", Product.class).getResultList();
 	}
 }

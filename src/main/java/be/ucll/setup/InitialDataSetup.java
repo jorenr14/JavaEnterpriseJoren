@@ -52,14 +52,14 @@ public class InitialDataSetup {
             entityManager.persist(order2);
 
             // Maak producten voor eerste order
-            Product product1 = new Product("Muis", 25.99, order1);
-            Product product2 = new Product("Toetsenbord", 49.99, order1);
+            Product product1 = new Product("Muis", 25.99, "draadloze muis", order1);
+            Product product2 = new Product("Toetsenbord", 49.99,"Led toetsenbord", order1);
 
             // Maak product voor tweede order
-            Product product3 = new Product("Laptop", 999.99, order2);
+            Product product3 = new Product("Laptop", 999.99,"Van Logi", order2);
 
             // Voeg producten toe aan orders
-            order1.setProducts(List.of(product1, product2)); // Producten aan order koppelen
+            order1.setProducts(List.of(product1, product2));
             order2.setProducts(List.of(product3));
 
             // Persist producten
