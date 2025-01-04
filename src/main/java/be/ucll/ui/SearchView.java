@@ -62,7 +62,7 @@ public class SearchView extends VerticalLayout {
 
 
         Div searchForm = new Div(productNameField, minAmountField, maxAmountField,
-                productCountField, deliveredCheckbox, emailField,
+                productCountField, emailField, deliveredCheckbox,
                 searchButton, clearButton, emailButton);
 
         searchForm.addClassName("search-form");
@@ -114,8 +114,8 @@ public class SearchView extends VerticalLayout {
         orderGrid.addColumn(Order::getId).setHeader("ID");
         orderGrid.addColumn(Order::getCustomerName).setHeader("Klant");
         orderGrid.addColumn(order -> order.getProducts().size()).setHeader("Aantal Producten");
-        orderGrid.addColumn(Order::isDelivered).setHeader("Afgeleverd");
         orderGrid.addColumn(Order::getTotalAmount).setHeader("Totaalbedrag (€)");
+        orderGrid.addColumn(Order::isDelivered).setHeader("Afgeleverd");
 
         orderGrid.addColumn(order ->
                 order.getProducts().stream()

@@ -24,7 +24,7 @@ public class HeaderComponent extends Div {
         Span shopInfo = new Span("Welkom bij Enterprise Store!");
         shopInfo.getStyle().set("margin-left", "10px");
 
-        Button logoutButton = new Button("Logout", event -> {
+        Button logoutButton = new Button("Log out", event -> {
             UI.getCurrent().navigate("login");
             VaadinSession.getCurrent().close();
         });

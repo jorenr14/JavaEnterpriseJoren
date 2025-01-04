@@ -27,7 +27,7 @@ public class LoginView extends VerticalLayout {
 	private UserService userService;
 
 	public LoginView() {
-		H1 title = new H1("Inloggen");
+		H1 title = new H1("Log in");
 
 		TextField username = new TextField("Gebruikersnaam");
 		PasswordField password = new PasswordField("Wachtwoord");
